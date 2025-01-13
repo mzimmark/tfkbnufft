@@ -150,7 +150,7 @@ class KbNufftModule(KbModule):
         return interpob
 
 def kbnufft_forward(interpob, multiprocessing=False):
-    @tf.function(experimental_relax_shapes=True)
+    @tf.function(reduce_retracing=True)
     @tf.custom_gradient
     def kbnufft_forward_for_interpob(x, om):
         """Apply FFT and interpolate from gridded data to scattered data.
@@ -207,7 +207,7 @@ def kbnufft_forward(interpob, multiprocessing=False):
     return kbnufft_forward_for_interpob
 
 def kbnufft_adjoint(interpob, multiprocessing=False):
-    @tf.function(experimental_relax_shapes=True)
+    @tf.function(reduce_retracing=True)
     @tf.custom_gradient
     def kbnufft_adjoint_for_interpob(y, om):
         """Interpolate from scattered data to gridded data and then iFFT.

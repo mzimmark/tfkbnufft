@@ -57,7 +57,7 @@ def calc_coef_and_indices(tm, kofflist, Jval, table, centers, L, dims, conjcoef=
 
     return coef, arr_ind
 
-@tf.function(experimental_relax_shapes=True)
+@tf.function(reduce_retracing=True)
 def run_interp(griddat, tm, params):
     """Interpolates griddat to off-grid coordinates with input sparse matrices.
 
@@ -107,7 +107,7 @@ def run_interp(griddat, tm, params):
 
     return kdat
 
-@tf.function(experimental_relax_shapes=True)
+@tf.function(reduce_retracing=True)
 def run_interp_back(kdat, tm, params):
     """Interpolates kdat to on-grid coordinates.
 
@@ -163,7 +163,7 @@ def run_interp_back(kdat, tm, params):
     griddat = tf.transpose(tf.complex(griddat_real, griddat_imag))
     return griddat
 
-@tf.function(experimental_relax_shapes=True)
+@tf.function(reduce_retracing=True)
 def kbinterp(x, om, interpob, conj=False):
     """Apply table interpolation.
 
@@ -219,11 +219,11 @@ def kbinterp(x, om, interpob, conj=False):
             y = y_not_shifted * shift
         return y
 
-    y = tf.map_fn(_map_body, [x, tm, om], dtype=x.dtype)
+    y = tf.map_fn(_map_body, [x, tm, om], fn_output_signature=x.dtype)
 
     return y
 
-@tf.function(experimental_relax_shapes=True)
+@tf.function(reduce_retracing=True)
 def adjkbinterp(y, om, interpob):
     """Apply table interpolation adjoint.
 
@@ -272,7 +272,7 @@ def adjkbinterp(y, om, interpob):
         x = run_interp_back(y_shifted, _tm, params)
         return x
 
-    x = tf.map_fn(_map_body, [y, om, tm], dtype=y.dtype)
+    x = tf.map_fn(_map_body, [y, om, tm], fn_output_signature=y.dtype)
 
     bsize = tf.shape(y)[0]
     ncoil = tf.shape(y)[1]
